@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+    eureka-server:
+        image: eurekaserver:0.0.1-SNAPSHOT
+        container_name: eureka-server
+        ports:
+            - "8761:8761"
+        networks:
+            - spring-boot-network
+    config-server:
+        image: configserver:0.0.1-SNAPSHOT
+        container_name: config_server
+        environment:
+            - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+        ports:
+            - "8888:8888"
+        depends_on:
+            - eureka-server
+        networks:
+            - spring-boot-network
+    authentication-service:
+        image: authentication:0.0.1-SNAPSHOT
+        container_name: authentication
+        ports:
+          - "1812:1812"
+        environment:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-db:5432/articledb
+          SPRING_DATASOURCE_USERNAME: ${POSTGRES_USERNAME}
+          SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+          EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+          SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+        depends_on:
+          - eureka-server
+          - config-server
+          - postgresql-db
+        networks:
+          - spring-boot-network
+
+    postgresql-db:
+        image: postgres:latest
+        container_name: postgresqldb
+        ports:
+          - "5432:5432"
+        environment:
+          - "POSTGRES_USER=${POSTGRES_USERNAME}"
+          - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+          - "POSTGRES_DB=${POSTGRES_DATABASE}"
+        networks:
+          - spring-boot-network
+networks:
+    spring-boot-network:
+        driver: bridge

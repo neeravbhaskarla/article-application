@@ -1,0 +1,24 @@
+spring:
+    application:
+        name: authentication
+    config:
+        import: "optional:configserver:"
+    datasource:
+        url: jdbc:postgresql://localhost:5432/articledb
+        driver-class-name: org.postgresql.Driver
+        username: user1
+        password: neerav123
+    jpa:
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+    cloud:
+        config:
+            fail-fast: false
+eureka:
+    client:
+        service-url:
+            defaultZone: "${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}"
+            
+server:
+    port: 1812
